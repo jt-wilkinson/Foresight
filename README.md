@@ -42,14 +42,6 @@ Foresight is a simple C++ application that projects your future savings based on
 - `resource.h`: Header file for defining resource IDs.
 - `Foresight.rc`: Resource file for defining UI elements like icons and menus.
 
-## Contributing
-
-1. Fork the repository.
-2. Create your feature branch (`git checkout -b feature/your-feature`).
-3. Commit your changes (`git commit -m 'Add some feature'`).
-4. Push to the branch (`git push origin feature/your-feature`).
-5. Open a pull request.
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
