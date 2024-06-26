@@ -17,15 +17,17 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
+HWND hNetPay, hSavings, hExpenses, hComboBox, hResult;
+double netPay = 0.0, savings = 0.0, expenses = 0.0;
+int projectionPeriod = 1;
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-                     _In_opt_ HINSTANCE hPrevInstance,
-                     _In_ LPWSTR    lpCmdLine,
-                     _In_ int       nCmdShow)
+    _In_opt_ HINSTANCE hPrevInstance,
+    _In_ LPWSTR    lpCmdLine,
+    _In_ int       nCmdShow)
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
-
-    // TODO: Place code here.
 
     // Initialize global strings
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -33,7 +35,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     MyRegisterClass(hInstance);
 
     // Perform application initialization:
-    if (!InitInstance (hInstance, nCmdShow))
+    if (!InitInstance(hInstance, nCmdShow))
     {
         return FALSE;
     }
@@ -52,104 +54,128 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
     }
 
-    return (int) msg.wParam;
+    return (int)msg.wParam;
 }
 
-
-
-//
-//  FUNCTION: MyRegisterClass()
-//
-//  PURPOSE: Registers the window class.
-//
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
     WNDCLASSEXW wcex;
 
     wcex.cbSize = sizeof(WNDCLASSEX);
 
-    wcex.style          = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc    = WndProc;
-    wcex.cbClsExtra     = 0;
-    wcex.cbWndExtra     = 0;
-    wcex.hInstance      = hInstance;
-    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_FORESIGHT));
-    wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_FORESIGHT);
-    wcex.lpszClassName  = szWindowClass;
-    wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+    wcex.style = CS_HREDRAW | CS_VREDRAW;
+    wcex.lpfnWndProc = WndProc;
+    wcex.cbClsExtra = 0;
+    wcex.cbWndExtra = 0;
+    wcex.hInstance = hInstance;
+    wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_FORESIGHT));
+    wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_FORESIGHT);
+    wcex.lpszClassName = szWindowClass;
+    wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
     return RegisterClassExW(&wcex);
 }
 
-//
-//   FUNCTION: InitInstance(HINSTANCE, int)
-//
-//   PURPOSE: Saves instance handle and creates main window
-//
-//   COMMENTS:
-//
-//        In this function, we save the instance handle in a global variable and
-//        create and display the main program window.
-//
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-   hInst = hInstance; // Store instance handle in our global variable
+    hInst = hInstance; // Store instance handle in our global variable
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, 0, 300, 325, nullptr, nullptr, hInstance, nullptr);
 
-   if (!hWnd)
-   {
-      return FALSE;
-   }
+    if (!hWnd)
+    {
+        return FALSE;
+    }
 
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+    ShowWindow(hWnd, nCmdShow);
+    UpdateWindow(hWnd);
 
-   return TRUE;
+    // Create UI elements
+    CreateWindowW(L"static", L"Monthly Credits:", WS_VISIBLE | WS_CHILD, 20, 20, 150, 20, hWnd, nullptr, hInstance, nullptr);
+    hNetPay = CreateWindowW(L"edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER | ES_NUMBER, 170, 20, 100, 20, hWnd, nullptr, hInstance, nullptr);
+
+    CreateWindowW(L"static", L"Savings:", WS_VISIBLE | WS_CHILD, 20, 60, 100, 20, hWnd, nullptr, hInstance, nullptr);
+    hSavings = CreateWindowW(L"edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER | ES_NUMBER, 120, 60, 100, 20, hWnd, nullptr, hInstance, nullptr);
+
+    CreateWindowW(L"static", L"Monthly Debits:", WS_VISIBLE | WS_CHILD, 20, 100, 120, 20, hWnd, nullptr, hInstance, nullptr);
+    hExpenses = CreateWindowW(L"edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER | ES_NUMBER, 140, 100, 100, 20, hWnd, nullptr, hInstance, nullptr);
+
+    CreateWindowW(L"static", L"Projection Period:", WS_VISIBLE | WS_CHILD, 20, 140, 120, 20, hWnd, nullptr, hInstance, nullptr);
+    hComboBox = CreateWindowW(L"combobox", NULL, CBS_DROPDOWN | CBS_HASSTRINGS | WS_CHILD | WS_OVERLAPPED | WS_VISIBLE, 140, 140, 100, 100, hWnd, nullptr, hInstance, nullptr);
+
+    SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"1 Month");
+    SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"3 Months");
+    SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"6 Months");
+    SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"1 Year");
+
+    CreateWindowW(L"button", L"Calculate", WS_VISIBLE | WS_CHILD, 20, 180, 100, 30, hWnd, (HMENU)1, hInstance, nullptr);
+    hResult = CreateWindowW(L"static", L"", WS_VISIBLE | WS_CHILD, 20, 220, 220, 20, hWnd, nullptr, hInstance, nullptr);
+
+    return TRUE;
 }
 
-//
-//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  PURPOSE: Processes messages for the main window.
-//
-//  WM_COMMAND  - process the application menu
-//  WM_PAINT    - Paint the main window
-//  WM_DESTROY  - post a quit message and return
-//
-//
+void CalculateProjection()
+{
+    wchar_t buffer[256];
+    GetWindowText(hNetPay, buffer, 256);
+    netPay = _wtof(buffer);
+
+    GetWindowText(hSavings, buffer, 256);
+    savings = _wtof(buffer);
+
+    GetWindowText(hExpenses, buffer, 256);
+    expenses = _wtof(buffer);
+
+    int periodIndex = SendMessage(hComboBox, CB_GETCURSEL, 0, 0);
+    switch (periodIndex)
+    {
+    case 0: projectionPeriod = 1; break;
+    case 1: projectionPeriod = 3; break;
+    case 2: projectionPeriod = 6; break;
+    case 3: projectionPeriod = 12; break;
+    default: projectionPeriod = 1; break;
+    }
+
+    double projectedSavings = savings + (netPay - expenses) * projectionPeriod;
+    swprintf_s(buffer, L"Projected Savings: %.2f", projectedSavings);
+    SetWindowText(hResult, buffer);
+}
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
     case WM_COMMAND:
+    {
+        int wmId = LOWORD(wParam);
+        // Parse the menu selections:
+        switch (wmId)
         {
-            int wmId = LOWORD(wParam);
-            // Parse the menu selections:
-            switch (wmId)
-            {
-            case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-                break;
-            case IDM_EXIT:
-                DestroyWindow(hWnd);
-                break;
-            default:
-                return DefWindowProc(hWnd, message, wParam, lParam);
-            }
+        case 1: // Calculate button clicked
+            CalculateProjection();
+            break;
+        case IDM_ABOUT:
+            DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+            break;
+        case IDM_EXIT:
+            DestroyWindow(hWnd);
+            break;
+        default:
+            return DefWindowProc(hWnd, message, wParam, lParam);
         }
-        break;
+    }
+    break;
     case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: Add any drawing code that uses hdc here...
-            EndPaint(hWnd, &ps);
-        }
-        break;
+    {
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(hWnd, &ps);
+        // TODO: Add any drawing code that uses hdc here...
+        EndPaint(hWnd, &ps);
+    }
+    break;
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
