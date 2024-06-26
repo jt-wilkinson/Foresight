@@ -15,18 +15,6 @@ Foresight is a simple C++ application that projects your future savings based on
 - Windows operating system.
 - Microsoft Visual Studio (or any compatible C++ development environment).
 
-### Installation
-
-1. Clone the repository:
-    ```bash
-    git clone https://github.com/yourusername/foresight.git
-    ```
-
-2. Open the project in your C++ development environment.
-
-3. Build the project:
-    - In Visual Studio, open the `.sln` file and build the solution.
-
 ### Running the Application
 
 1. Run the built executable.
